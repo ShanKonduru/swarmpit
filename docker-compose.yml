@@ -16,48 +16,21 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - net
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 1024M
-        reservations:
-          cpus: '0.25'
-          memory: 512M
-      placement:
-        constraints:
-          - node.role == manager
+      - swarmpit_net
 
   db:
     image: couchdb:2.3.0
     volumes:
       - db-data:/opt/couchdb/data
     networks:
-      - net
-    deploy:
-      resources:
-        limits:
-          cpus: '0.30'
-          memory: 256M
-        reservations:
-          cpus: '0.15'
-          memory: 128M
+      - db_net
 
   influxdb:
     image: influxdb:1.8
     volumes:
       - influx-data:/var/lib/influxdb
     networks:
-      - net
-    deploy:
-      resources:
-        limits:
-          cpus: '0.60'
-          memory: 512M
-        reservations:
-          cpus: '0.30'
-          memory: 128M
+      - influxdb_net
 
   agent:
     image: swarmpit/agent:latest
@@ -66,7 +39,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - net
+      - agent_net
     deploy:
       mode: global
       labels:
@@ -80,8 +53,18 @@ services:
           memory: 32M
 
 networks:
-  net:
+  swarmpit_net:
     driver: overlay
+    attachable: true
+  db_net:
+    driver: overlay
+    attachable: true
+  influxdb_net:
+    driver: overlay
+    attachable: true
+  agent_net:
+    driver: overlay
+    attachable: true
 
 volumes:
   db-data:
